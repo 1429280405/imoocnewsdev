@@ -2,6 +2,7 @@ package com.imooc.api.controller.user;
 
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 /**
@@ -12,6 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public interface HelloControllerApi {
 
     @ApiOperation(value = "hello方法的接口",notes = "hello方法的接口",httpMethod = "GET")
-    @RequestMapping("/hello")
+    @GetMapping("/hello")
     public Object hello();
 }
