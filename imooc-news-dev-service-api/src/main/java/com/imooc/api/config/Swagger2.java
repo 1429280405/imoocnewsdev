@@ -32,7 +32,7 @@ public class Swagger2 {
         return new Docket(DocumentationType.SWAGGER_2)  // 指定api类型为swagger2
                 .apiInfo(apiInfo())                 // 用于定义api文档汇总信息
                 .select()
-                .apis(Predicates.or(userPredicate/*, adminPredicate, filesPredicate*/))
+                .apis(Predicates.or(userPredicate))
 //                .apis(Predicates.or(adminPredicate, articlePredicate, userPredicate, filesPredicate))
                 .paths(PathSelectors.any())         // 所有controller
                 .build();
@@ -49,4 +49,25 @@ public class Swagger2 {
                 .termsOfServiceUrl("https://www.imooc.com")     // 网站地址
                 .build();
     }
+
+
+
+   /* @Bean
+    public Docket createRestApi() {
+        return new Docket(DocumentationType.SWAGGER_2)
+                .pathMapping("/")
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.imooc.api.controller.user"))
+                .paths(PathSelectors.any())
+                .build().apiInfo(new ApiInfoBuilder()
+                        .title("慕课新闻·自媒体接口api")
+                        .description("专为慕课新闻·自媒体平台提供的api文档")
+                        .version("1.0.1")
+                        .contact(new Contact("imooc",
+                                "https://www.imooc.com",
+                                "1429280405@qq.com"))
+                        .license("The Apache License")
+                        .licenseUrl("https://www.imooc.com")
+                        .build());
+    }*/
 }
