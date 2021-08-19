@@ -11,6 +11,7 @@ import tk.mybatis.spring.annotation.MapperScan;
  */
 @SpringBootApplication
 @MapperScan("com.imooc.user.mapper")
+@ComponentScan(basePackages = {"com.imooc", "org.n3r.idworker"})
 public class UserApp {
     public static void main(String[] args) {
         SpringApplication.run(UserApp.class,args);
