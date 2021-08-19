@@ -2,12 +2,16 @@ package com.imooc.user.service.impl;
 
 import com.imooc.enums.Sex;
 import com.imooc.enums.UserStatus;
+import com.imooc.exception.GraceException;
+import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.AppUser;
+import com.imooc.pojo.bo.UpdateUserInfoBO;
 import com.imooc.user.mapper.AppUserMapper;
 import com.imooc.user.service.UserService;
 import com.imooc.utils.DateUtil;
 import com.imooc.utils.DesensitizationUtil;
 import org.n3r.idworker.Sid;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -63,5 +67,23 @@ public class UserServiceImpl implements UserService {
         user.setUpdatedTime(new Date());
         appUserMapper.insert(user);
         return user;
+    }
+
+    @Override
+    public AppUser getUser(String userId) {
+        return appUserMapper.selectByPrimaryKey(userId);
+    }
+
+    @Override
+    public void updateUserInfo(UpdateUserInfoBO userInfoBO) {
+        //完善用户信息
+        AppUser user = new AppUser();
+        BeanUtils.copyProperties(userInfoBO, user);
+        user.setUpdatedTime(new Date());
+        user.setActiveStatus(UserStatus.ACTIVE.type);
+        int result = appUserMapper.updateByPrimaryKeySelective(user);
+        if (!(result == 1)) {
+            GraceException.display(ResponseStatusEnum.USER_UPDATE_ERROR);
+        }
     }
 }

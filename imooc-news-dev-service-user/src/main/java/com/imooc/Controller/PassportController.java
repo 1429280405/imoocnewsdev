@@ -9,6 +9,7 @@ import com.imooc.pojo.AppUser;
 import com.imooc.pojo.bo.RegistLoginBO;
 import com.imooc.user.service.UserService;
 import com.imooc.utils.IPUtil;
+import com.imooc.utils.JsonUtils;
 import com.imooc.utils.SMSUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.Map;
+import java.util.UUID;
 
 /**
  * @author liujinqiang
@@ -64,11 +66,26 @@ public class PassportController extends BaseController implements PassportContro
         if (appUser != null && appUser.getActiveStatus() == UserStatus.FROZEN.type) {
             //如果用户不为空并且是已冻结状态，抛出异常禁止登陆
             return GraceJSONResult.errorCustom(ResponseStatusEnum.USER_FROZEN);
-        }else if (appUser==null){
+        } else if (appUser == null) {
             //用户未注册入库
-            userService.createUser(registLoginBO.getMobile());
+            appUser = userService.createUser(registLoginBO.getMobile());
         }
 
-        return GraceJSONResult.ok(appUser);
+        //保存用户会话
+        Integer activeStatus = appUser.getActiveStatus();
+        if (activeStatus != UserStatus.FROZEN.type) {
+            //保存token到redis
+            String uToken = UUID.randomUUID().toString();
+            redis.set(REDIS_USER_TOKEN + ":" + appUser.getId(), uToken);
+            redis.set(REDIS_USER_INFO + ":" + appUser.getId(), JsonUtils.objectToJson(appUser));
+
+            //保存用户id和token到cookie中
+            setCookie(request, response, "utoken", uToken, COOKIE_MONTH);
+            setCookie(request, response, "uid", appUser.getId(), COOKIE_MONTH);
+        }
+        //用户注册成功后需要删除redis短信验证码
+        redis.del(MOBILE_SMSCODE + ":" + registLoginBO.getMobile());
+        //返回用户状态
+        return GraceJSONResult.ok(activeStatus);
     }
 }

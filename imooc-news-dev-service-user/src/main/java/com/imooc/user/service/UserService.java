@@ -1,6 +1,7 @@
 package com.imooc.user.service;
 
 import com.imooc.pojo.AppUser;
+import com.imooc.pojo.bo.UpdateUserInfoBO;
 
 /**
  * @author liujq
@@ -16,4 +17,8 @@ public interface UserService {
      * 创建用户，新增用户记录到数据库
      */
     public AppUser createUser(String mobile);
+
+    AppUser getUser(String userId);
+
+    void updateUserInfo(UpdateUserInfoBO userInfoBO);
 }
