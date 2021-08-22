@@ -10,6 +10,8 @@ import com.imooc.user.mapper.AppUserMapper;
 import com.imooc.user.service.UserService;
 import com.imooc.utils.DateUtil;
 import com.imooc.utils.DesensitizationUtil;
+import com.imooc.utils.JsonUtils;
+import com.imooc.utils.RedisOperator;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +36,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private Sid sid;
+
+    @Autowired
+    private RedisOperator redis;
+    public static final String REDIS_USER_INFO = "redis_user_info";
 
     @Override
     public AppUser queryMobileIsExist(String mobile) {
@@ -76,6 +82,9 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void updateUserInfo(UpdateUserInfoBO userInfoBO) {
+        String userId = userInfoBO.getId();
+        // 保证双写一致，先删除redis中的数据，后更新数据库
+        redis.del(REDIS_USER_INFO + ":" + userId);
         //完善用户信息
         AppUser user = new AppUser();
         BeanUtils.copyProperties(userInfoBO, user);
@@ -85,5 +94,17 @@ public class UserServiceImpl implements UserService {
         if (!(result == 1)) {
             GraceException.display(ResponseStatusEnum.USER_UPDATE_ERROR);
         }
+        // 再次查询用户的最新信息，放入redis中
+        AppUser appUser = getUser(userId);
+        redis.set(REDIS_USER_INFO + ":" + userId, JsonUtils.objectToJson(appUser));
+
+        // 缓存双删策略
+        try {
+            Thread.sleep(100);
+            redis.del(REDIS_USER_INFO + ":" + userId);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
     }
 }
