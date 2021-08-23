@@ -1,6 +1,7 @@
 package com.imooc.files.controller;
 
 import com.imooc.api.controller.files.FileUploaderControllerApi;
+import com.imooc.files.resource.FileResource;
 import com.imooc.files.service.UploaderService;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
@@ -21,6 +22,9 @@ public class FileUploaderController implements FileUploaderControllerApi {
     @Autowired
     private UploaderService uploaderService;
 
+    @Autowired
+    private FileResource fileResource;
+
     @Override
     public GraceJSONResult uploadFace(String userId, MultipartFile file) throws Exception {
         String path = "";
@@ -34,7 +38,7 @@ public class FileUploaderController implements FileUploaderControllerApi {
             return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_FORMATTER_FAILD);
         }
         //获得后缀
-        String suffix = filename.substring(filename.indexOf("."), filename.length());
+        String suffix = filename.substring(filename.indexOf(".")+1, filename.length());
         if (!suffix.equalsIgnoreCase("png") &&
                 !suffix.equalsIgnoreCase("jpg") &&
                 !suffix.equalsIgnoreCase("jpeg")) {
@@ -43,6 +47,11 @@ public class FileUploaderController implements FileUploaderControllerApi {
         //执行上传
         path = uploaderService.uploadFdfs(file, suffix);
         log.info("path:{}", path);
-        return GraceJSONResult.ok(path);
+        if (StringUtils.isBlank(path)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.FILE_UPLOAD_FAILD);
+        }
+        String finalPath = fileResource.getHost() + path;
+
+        return GraceJSONResult.ok(finalPath);
     }
 }
