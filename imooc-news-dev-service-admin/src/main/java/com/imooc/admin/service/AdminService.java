@@ -1,6 +1,8 @@
 package com.imooc.admin.service;
 
 import com.imooc.pojo.AdminUser;
+import com.imooc.pojo.bo.NewAdminBO;
+import com.imooc.utils.PagedGridResult;
 
 /**
  * @author liujq
@@ -8,4 +10,8 @@ import com.imooc.pojo.AdminUser;
  */
 public interface AdminService {
     AdminUser findByUserName(String username);
+
+    PagedGridResult queryAdminList(Integer page, Integer pageSize);
+
+    void createAdminUser(NewAdminBO newAdminBO);
 }
