@@ -12,8 +12,8 @@ public class NewAdminBO {
 
     @NotBlank(message = "用户名不能为空！")
     private String username;
+    @NotBlank(message = "负责人不能为空")
     private String adminName;
-    @NotBlank(message = "密码不能为空")
     private String password;
     private String confirmPassword;
     private String img64;

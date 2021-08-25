@@ -46,13 +46,13 @@
         </dependency>
 
         <!-- 引入 mongodb 依赖 -->
-        <!--<dependency>
+        <dependency>
             <groupId>org.mongodb</groupId>
             <artifactId>mongodb-driver</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
-        </dependency>-->
+        </dependency>
     </dependencies>
 </project>

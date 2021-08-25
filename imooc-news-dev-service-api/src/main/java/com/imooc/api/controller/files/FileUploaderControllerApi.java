@@ -1,6 +1,7 @@
 package com.imooc.api.controller.files;
 
 import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.bo.NewAdminBO;
 import com.imooc.pojo.bo.RegistLoginBO;
 import com.imooc.pojo.bo.UpdateUserInfoBO;
 import io.swagger.annotations.Api;
@@ -26,5 +27,17 @@ public interface FileUploaderControllerApi {
     @PostMapping("/uploadFace")
     public GraceJSONResult uploadFace(@RequestParam String userId,
                                       MultipartFile file) throws Exception;
+
+
+    /**
+     * 文件上传至mongodb的gridfs中
+     * @param newAdminBO
+     * @return
+     * @throws Exception
+     */
+    @PostMapping("/uploadToGridFS")
+    public GraceJSONResult uploadToGridFS(@RequestBody NewAdminBO newAdminBO) throws Exception;
+
+
 
 }
