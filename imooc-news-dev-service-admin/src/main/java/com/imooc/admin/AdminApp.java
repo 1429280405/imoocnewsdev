@@ -2,6 +2,7 @@ package com.imooc.admin;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import tk.mybatis.spring.annotation.MapperScan;
 
@@ -10,7 +11,7 @@ import tk.mybatis.spring.annotation.MapperScan;
  * @create 2021-08-24 15:27
  */
 
-@SpringBootApplication
+@SpringBootApplication(exclude = MongoAutoConfiguration.class)
 @MapperScan(basePackages = "com.imooc.admin.mapper")
 @ComponentScan(basePackages = {"com.imooc", "org.n3r.idworker"})
 public class AdminApp {

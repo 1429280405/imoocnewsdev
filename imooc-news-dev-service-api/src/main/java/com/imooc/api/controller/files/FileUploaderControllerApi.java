@@ -13,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.io.FileNotFoundException;
 
 /**
  * @author liujinqiang
@@ -31,6 +32,7 @@ public interface FileUploaderControllerApi {
 
     /**
      * 文件上传至mongodb的gridfs中
+     *
      * @param newAdminBO
      * @return
      * @throws Exception
@@ -39,5 +41,29 @@ public interface FileUploaderControllerApi {
     public GraceJSONResult uploadToGridFS(@RequestBody NewAdminBO newAdminBO) throws Exception;
 
 
+    /**
+     * 从gridfs中读取图片内容
+     *
+     * @param faceId
+     * @param request
+     * @param response
+     */
+    @GetMapping("/readInGridFS")
+    public void readInGridFS(String faceId,
+                             HttpServletRequest request,
+                             HttpServletResponse response) throws FileNotFoundException;
+
+    /**
+     * 从gridfs中读取图片内容，并且返回base64
+     *
+     * @param faceId
+     * @param request
+     * @param response
+     * @throws Exception
+     */
+    @GetMapping("/readFace64InGridFS")
+    public GraceJSONResult readFace64InGridFS(String faceId,
+                                   HttpServletRequest request,
+                                   HttpServletResponse response) throws Exception;
 
 }
