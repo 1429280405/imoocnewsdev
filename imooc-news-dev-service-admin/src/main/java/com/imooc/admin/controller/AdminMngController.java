@@ -96,6 +96,17 @@ public class AdminMngController extends BaseController implements AdminMngContro
         return GraceJSONResult.ok();
     }
 
+    @Override
+    public GraceJSONResult adminLogout(String adminId, HttpServletRequest request, HttpServletResponse response) {
+        //删除redis
+        redis.del(REDIS_ADMIN_TOKEN+":"+adminId);
+        //删除cookie
+        deleteCookie(request,response,"atoken");
+        deleteCookie(request,response,"aid");
+        deleteCookie(request,response,"aname");
+        return GraceJSONResult.ok();
+    }
+
 
     private void doLoginSettings(AdminUser adminUser, HttpServletRequest request, HttpServletResponse response) {
         //生成token，设置cookie

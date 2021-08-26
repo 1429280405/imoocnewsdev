@@ -1,5 +1,6 @@
 package com.imooc.api.config;
 
+import com.imooc.api.interceptors.AdminCookieAndTokenInterceptor;
 import com.imooc.api.interceptors.PassportInterceptor;
 import com.imooc.api.interceptors.UserActiveInterceptor;
 import com.imooc.api.interceptors.UserTokenInterceptor;
@@ -25,10 +26,15 @@ public class InterceptorConfig implements WebMvcConfigurer {
         return new UserTokenInterceptor();
     }
 
+    @Bean
     public UserActiveInterceptor userActiveInterceptor() {
         return new UserActiveInterceptor();
     }
 
+    @Bean
+    public AdminCookieAndTokenInterceptor adminCookieAndTokenInterceptor(){
+        return new AdminCookieAndTokenInterceptor();
+    }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
@@ -45,5 +51,17 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 .addPathPatterns("/fans/follow")
                 .addPathPatterns("/fans/unfollow");
 
+
+        registry.addInterceptor(adminCookieAndTokenInterceptor())
+                .addPathPatterns("/adminMng/adminIsExist")
+                .addPathPatterns("/adminMng/addNewAdmin")
+                .addPathPatterns("/adminMng/getAdminList")
+                .addPathPatterns("/fs/uploadToGridFS")
+                .addPathPatterns("/fs/readInGridFS")
+                .addPathPatterns("/friendLinkMng/saveOrUpdateFriendLink")
+                .addPathPatterns("/friendLinkMng/getFriendLinkList")
+                .addPathPatterns("/friendLinkMng/delete")
+                .addPathPatterns("/categoryMng/saveOrUpdateCategory")
+                .addPathPatterns("/categoryMng/getCatList");
     }
 }
