@@ -53,5 +53,9 @@ public interface AdminMngControllerApi {
                                        HttpServletRequest request,
                                        HttpServletResponse response);
 
-
+    @ApiOperation(value = "管理员注销", notes = "管理员注销", httpMethod = "POST")
+    @PostMapping("/adminLogout")
+    public GraceJSONResult adminLogout(@RequestParam String adminId,
+                                      HttpServletRequest request,
+                                      HttpServletResponse response);
 }
