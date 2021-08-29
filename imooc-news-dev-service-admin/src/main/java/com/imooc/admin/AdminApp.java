@@ -11,7 +11,7 @@ import tk.mybatis.spring.annotation.MapperScan;
  * @create 2021-08-24 15:27
  */
 
-@SpringBootApplication(exclude = MongoAutoConfiguration.class)
+@SpringBootApplication
 @MapperScan(basePackages = "com.imooc.admin.mapper")
 @ComponentScan(basePackages = {"com.imooc", "org.n3r.idworker"})
 public class AdminApp {
