@@ -30,6 +30,12 @@ public interface FileUploaderControllerApi {
                                       MultipartFile file) throws Exception;
 
 
+    @ApiOperation(value = "上传多个文件", notes = "上传多个文件", httpMethod = "POST")
+    @PostMapping("/uploadSomeFiles")
+    public GraceJSONResult uploadSomeFiles(@RequestParam String userId,
+                                      MultipartFile[] files) throws Exception;
+
+
     /**
      * 文件上传至mongodb的gridfs中
      *

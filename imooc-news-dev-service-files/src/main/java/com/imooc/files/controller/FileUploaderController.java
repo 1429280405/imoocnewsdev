@@ -22,11 +22,12 @@ import sun.misc.BASE64Decoder;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.awt.*;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author liujq
@@ -76,6 +77,43 @@ public class FileUploaderController implements FileUploaderControllerApi {
     }
 
     @Override
+    public GraceJSONResult uploadSomeFiles(String userId, MultipartFile[] files) throws Exception {
+        //申明list，用于存放多个图片的地址路径，返回到前端
+        List<String> imageUrlList = new ArrayList<>();
+        if (files == null || files.length == 0) {
+            return GraceJSONResult.ok(imageUrlList);
+        }
+        for (MultipartFile file : files) {
+            String path = "";
+            if (file == null) {
+                continue;
+            }
+            //获得文件上传名称
+            String filename = file.getOriginalFilename();
+            //判断文件名不能为空
+            if (StringUtils.isBlank(filename)) {
+                continue;
+            }
+            //获得后缀
+            String suffix = filename.substring(filename.indexOf(".") + 1, filename.length());
+            if (!suffix.equalsIgnoreCase("png") &&
+                    !suffix.equalsIgnoreCase("jpg") &&
+                    !suffix.equalsIgnoreCase("jpeg")) {
+                continue;
+            }
+            //执行上传
+            path = uploaderService.uploadFdfs(file, suffix);
+            log.info("path:{}", path);
+            if (StringUtils.isBlank(path)) {
+                continue;
+            }
+            String finalPath = fileResource.getHost() + path;
+            imageUrlList.add(finalPath);
+        }
+        return GraceJSONResult.ok(imageUrlList);
+    }
+
+    @Override
     public GraceJSONResult uploadToGridFS(NewAdminBO newAdminBO) throws Exception {
         //获得图片的base64字符串
         String img64 = newAdminBO.getImg64();
@@ -108,7 +146,7 @@ public class FileUploaderController implements FileUploaderControllerApi {
     public GraceJSONResult readFace64InGridFS(String faceId, HttpServletRequest request, HttpServletResponse response) throws Exception {
         //获得人脸文件
         File file = readGridFSByFaceId(faceId);
-        
+
         //转换为base64
         String base64Face = FileUtils.fileToBase64(file);
         return GraceJSONResult.ok(base64Face);
