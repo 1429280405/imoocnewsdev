@@ -15,4 +15,6 @@ public interface CategoryMngService {
     List<Category> getCatList();
 
     boolean queryCatIsExist(String name, String oldCatName);
+
+    void modifyCategory(SaveCategoryBO newCategoryBO);
 }
