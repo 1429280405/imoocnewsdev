@@ -3,20 +3,24 @@ package com.imooc.admin.controller;
 import com.imooc.admin.service.AdminService;
 import com.imooc.api.BaseController;
 import com.imooc.api.controller.admin.AdminMngControllerApi;
+import com.imooc.enums.FaceVerifyType;
 import com.imooc.exception.GraceException;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.AdminUser;
 import com.imooc.pojo.bo.AdminLoginBO;
 import com.imooc.pojo.bo.NewAdminBO;
+import com.imooc.utils.FaceVerifyUtils;
 import com.imooc.utils.PagedGridResult;
 import com.imooc.utils.RedisOperator;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -36,6 +40,12 @@ public class AdminMngController extends BaseController implements AdminMngContro
 
     @Autowired
     private RedisOperator redis;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    @Autowired
+    private FaceVerifyUtils faceVerifyUtils;
 
     @Override
     public GraceJSONResult adminLogin(AdminLoginBO adminLoginBO, HttpServletRequest request, HttpServletResponse response) {
@@ -99,11 +109,47 @@ public class AdminMngController extends BaseController implements AdminMngContro
     @Override
     public GraceJSONResult adminLogout(String adminId, HttpServletRequest request, HttpServletResponse response) {
         //删除redis
-        redis.del(REDIS_ADMIN_TOKEN+":"+adminId);
+        redis.del(REDIS_ADMIN_TOKEN + ":" + adminId);
         //删除cookie
-        deleteCookie(request,response,"atoken");
-        deleteCookie(request,response,"aid");
-        deleteCookie(request,response,"aname");
+        deleteCookie(request, response, "atoken");
+        deleteCookie(request, response, "aid");
+        deleteCookie(request, response, "aname");
+        return GraceJSONResult.ok();
+    }
+
+    @Override
+    public GraceJSONResult adminFaceLogin(AdminLoginBO adminLoginBO, HttpServletRequest request, HttpServletResponse response) {
+        //判断用户名和人脸信息不能为空
+        // 0. 判断用户名和人脸信息不能为空
+        if (StringUtils.isBlank(adminLoginBO.getUsername())) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.ADMIN_USERNAME_NULL_ERROR);
+        }
+        String tempFace64 = adminLoginBO.getImg64();
+        if (StringUtils.isBlank(tempFace64)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_NULL_ERROR);
+        }
+        //1、从数据库中查询出faceID
+        AdminUser adminUser = adminService.findByUserName(adminLoginBO.getUsername());
+        String faceId = adminUser.getFaceId();
+        if (StringUtils.isBlank(faceId)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
+        }
+
+        //2、请求文件服务，获的人脸数据的base64数据
+        String fileServerUrlExecute = "http://files.imoocnews.com:8004/fs/readFace64InGridFS?faceId=" + faceId;
+        ResponseEntity<GraceJSONResult> responseEntity = restTemplate.getForEntity(fileServerUrlExecute, GraceJSONResult.class);
+        GraceJSONResult jsonResult = responseEntity.getBody();
+        String base64DB = (String) jsonResult.getData();
+        //调用阿里ai进行人脸对比
+        boolean result = faceVerifyUtils.faceVerify(FaceVerifyType.BASE64.type,
+                tempFace64,
+                base64DB,
+                60);
+        if (!result) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.ADMIN_FACE_LOGIN_ERROR);
+        }
+        //登录后的数据设置，redis与cookie
+        doLoginSettings(adminUser, request, response);
         return GraceJSONResult.ok();
     }
 

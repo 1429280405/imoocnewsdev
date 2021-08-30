@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.imooc.admin.mapper.AdminUserMapper;
 import com.imooc.admin.service.AdminService;
+import com.imooc.api.service.BaseService;
 import com.imooc.exception.GraceException;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.AdminUser;
@@ -25,7 +26,7 @@ import java.util.List;
  * @create 2021-08-24 16:29
  */
 @Service
-public class AdminServiceImpl implements AdminService {
+public class AdminServiceImpl extends BaseService implements AdminService {
 
     @Autowired
     private AdminUserMapper userMapper;
@@ -79,13 +80,5 @@ public class AdminServiceImpl implements AdminService {
 
     }
 
-    private PagedGridResult setterPagedGrid(List<AdminUser> userList, Integer page) {
-        PageInfo<AdminUser> pageList = new PageInfo<>(userList);
-        PagedGridResult gridResult = new PagedGridResult();
-        gridResult.setRows(userList);
-        gridResult.setPage(page);
-        gridResult.setRecords(pageList.getPages());
-        gridResult.setTotal(pageList.getTotal());
-        return gridResult;
-    }
+
 }
