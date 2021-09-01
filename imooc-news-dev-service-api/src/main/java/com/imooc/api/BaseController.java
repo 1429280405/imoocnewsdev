@@ -2,6 +2,7 @@ package com.imooc.api;
 
 
 import com.imooc.utils.RedisOperator;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.validation.BindingResult;
@@ -93,5 +94,11 @@ public class BaseController {
         }
     }
 
-
+    public Integer getCountsFromRedis(String key) {
+        String countsStr = redis.get(key);
+        if (StringUtils.isBlank(countsStr)) {
+            countsStr = "0";
+        }
+        return Integer.valueOf(countsStr);
+    }
 }
