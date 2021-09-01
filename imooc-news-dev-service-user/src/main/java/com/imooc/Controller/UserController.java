@@ -19,6 +19,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -79,12 +81,34 @@ public class UserController extends BaseController implements UserControllerApi 
 
     @Override
     public GraceJSONResult updateUserInfo(@Valid UpdateUserInfoBO userInfoBO, BindingResult bindingResult) {
-        if(bindingResult.hasErrors()){
+        if (bindingResult.hasErrors()) {
             Map<String, String> map = getErrors(bindingResult);
             return GraceJSONResult.errorMap(map);
         }
         //执行更新操作
         userService.updateUserInfo(userInfoBO);
         return GraceJSONResult.ok();
+    }
+
+    @Override
+    public GraceJSONResult queryByIds(String userIds) {
+        if (StringUtils.isBlank(userIds)) {
+            return GraceJSONResult.errorCustom(ResponseStatusEnum.USER_NOT_EXIST_ERROR);
+        }
+        List<AppUserVO> list = new ArrayList<>();
+        List<String> ids = JsonUtils.jsonToList(userIds, String.class);
+        for (String id : ids) {
+            AppUserVO appUserVO = getBasicUserInfo(id);
+            list.add(appUserVO);
+        }
+
+        return GraceJSONResult.ok(list);
+    }
+
+    private AppUserVO getBasicUserInfo(String id) {
+        AppUser user = getUser(id);
+        AppUserVO appUserVO = new AppUserVO();
+        BeanUtils.copyProperties(user, appUserVO);
+        return appUserVO;
     }
 }

@@ -15,4 +15,5 @@ public interface FriendLinkService {
 
     void delete(String linkId);
 
+    List<FriendLinkMO> queryPortalAllFriendLinkList();
 }
