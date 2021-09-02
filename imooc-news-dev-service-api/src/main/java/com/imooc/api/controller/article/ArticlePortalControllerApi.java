@@ -8,6 +8,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import java.util.Date;
 
@@ -23,17 +24,22 @@ public interface ArticlePortalControllerApi {
     @GetMapping("/list")
     public GraceJSONResult createArticle(@RequestParam String keyword,
                                          @RequestParam Integer category,
-                                         @ApiParam(name = "page", value = "查询下一页的第几页", required = false,defaultValue = "1")
-                                             @RequestParam Integer page,
-                                         @ApiParam(name = "pageSize", value = "分页的每一页显示的条数", required = false,defaultValue = "10")
-                                             @RequestParam Integer pageSize);
-
+                                         @ApiParam(name = "page", value = "查询下一页的第几页", required = false, defaultValue = "1")
+                                         @RequestParam Integer page,
+                                         @ApiParam(name = "pageSize", value = "分页的每一页显示的条数", required = false, defaultValue = "10")
+                                         @RequestParam Integer pageSize);
 
 
     @ApiOperation(value = "查询最热新闻", notes = "查询最热新闻", httpMethod = "GET")
     @GetMapping("/hotList")
     public GraceJSONResult hotList();
 
+    @ApiOperation(value = "文章详情查询", notes = "文章详情查询", httpMethod = "GET")
+    @GetMapping("/detail")
+    public GraceJSONResult detail(@RequestParam String articleId);
 
+    @ApiOperation(value = "阅读文章，文章阅读量累加", notes = "阅读文章，文章阅读量累加", httpMethod = "POST")
+    @PostMapping("/readArticle")
+    public GraceJSONResult readArticle(@RequestParam String articleId, HttpServletRequest request);
 
 }

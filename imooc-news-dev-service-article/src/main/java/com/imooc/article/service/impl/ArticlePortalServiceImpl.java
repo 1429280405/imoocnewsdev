@@ -7,8 +7,10 @@ import com.imooc.article.service.ArticlePortalService;
 import com.imooc.enums.ArticleReviewStatus;
 import com.imooc.enums.YesOrNo;
 import com.imooc.pojo.Article;
+import com.imooc.pojo.vo.ArticleDetailVO;
 import com.imooc.utils.PagedGridResult;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import tk.mybatis.mapper.entity.Example;
@@ -50,6 +52,21 @@ public class ArticlePortalServiceImpl extends BaseService implements ArticlePort
         PageHelper.startPage(1, 5);
         List<Article> list = articleMapper.selectByExample(articleExample);
         return list;
+    }
+
+    @Override
+    public ArticleDetailVO queryDetail(String articleId) {
+        Article article = new Article();
+        article.setId(articleId);
+        article.setIsAppoint(YesOrNo.NO.type);
+        article.setIsDelete(YesOrNo.NO.type);
+        article.setArticleStatus(ArticleReviewStatus.SUCCESS.type);
+        Article result = articleMapper.selectOne(article);
+
+        ArticleDetailVO detailVO = new ArticleDetailVO();
+        BeanUtils.copyProperties(result, detailVO);
+        detailVO.setCover(result.getArticleCover());
+        return detailVO;
     }
 
     private Example.Criteria generateCriteria(Example articleExample) {

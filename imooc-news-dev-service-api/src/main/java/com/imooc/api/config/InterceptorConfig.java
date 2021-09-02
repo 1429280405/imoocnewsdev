@@ -1,9 +1,6 @@
 package com.imooc.api.config;
 
-import com.imooc.api.interceptors.AdminCookieAndTokenInterceptor;
-import com.imooc.api.interceptors.PassportInterceptor;
-import com.imooc.api.interceptors.UserActiveInterceptor;
-import com.imooc.api.interceptors.UserTokenInterceptor;
+import com.imooc.api.interceptors.*;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -32,12 +29,20 @@ public class InterceptorConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public AdminCookieAndTokenInterceptor adminCookieAndTokenInterceptor(){
+    public AdminCookieAndTokenInterceptor adminCookieAndTokenInterceptor() {
         return new AdminCookieAndTokenInterceptor();
+    }
+
+    @Bean
+    public ArticleReadInterceptor articleReadInterceptor() {
+        return new ArticleReadInterceptor();
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(articleReadInterceptor())
+                .addPathPatterns("/portal/article/readArticle");
+
         registry.addInterceptor(passportInterceptor())
                 .addPathPatterns("/passport/getSMSCode");
 

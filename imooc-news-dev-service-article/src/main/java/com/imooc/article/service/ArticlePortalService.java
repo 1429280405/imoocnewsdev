@@ -1,6 +1,7 @@
 package com.imooc.article.service;
 
 import com.imooc.pojo.Article;
+import com.imooc.pojo.vo.ArticleDetailVO;
 import com.imooc.utils.PagedGridResult;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface ArticlePortalService {
     PagedGridResult queryIndexArticleList(String keyword, Integer category, Integer page, Integer pageSize);
 
     List<Article> hotList();
+
+    ArticleDetailVO queryDetail(String articleId);
 }

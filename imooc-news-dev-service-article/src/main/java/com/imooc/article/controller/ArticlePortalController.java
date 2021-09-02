@@ -6,7 +6,9 @@ import com.imooc.article.service.ArticlePortalService;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Article;
 import com.imooc.pojo.vo.AppUserVO;
+import com.imooc.pojo.vo.ArticleDetailVO;
 import com.imooc.pojo.vo.IndexArticleVO;
+import com.imooc.utils.IPUtil;
 import com.imooc.utils.JsonUtils;
 import com.imooc.utils.PagedGridResult;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +54,28 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     public GraceJSONResult hotList() {
         List<Article> articles = articlePortalService.hotList();
         return GraceJSONResult.ok(articles);
+    }
+
+    @Override
+    public GraceJSONResult detail(String articleId) {
+        ArticleDetailVO detailVO = articlePortalService.queryDetail(articleId);
+        Set<String> idSet = new HashSet<>();
+        idSet.add(articleId);
+        List<AppUserVO> publisherList = getPublisherList(idSet);
+        if (!publisherList.isEmpty()) {
+            detailVO.setPublishUserName(publisherList.get(0).getNickname());
+        }
+        detailVO.setReadCounts(getCountsFromRedis(REDIS_ARTICLE_READ_COUNTS + ":" + articleId));
+        return GraceJSONResult.ok(detailVO);
+    }
+
+    @Override
+    public GraceJSONResult readArticle(String articleId, HttpServletRequest request) {
+        String ip = IPUtil.getRequestIp(request);
+        //设置针对当前用户ip存在的永久key。表示该用户已经阅读过了，无法累加阅读量
+        redis.setnx(REDIS_ALREADY_READ + ":" + articleId + ":" + ip, ip);
+        redis.increment(REDIS_ARTICLE_READ_COUNTS + ":" + articleId, 1);
+        return GraceJSONResult.ok();
     }
 
     private PagedGridResult rebuildArticleGrid(PagedGridResult gridResult) {
