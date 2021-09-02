@@ -59,7 +59,7 @@ public class UserController extends BaseController implements UserControllerApi 
         //查询判断redis中是否包含用户信息，如果包含直接返回无需查询数据库
         String userJson = redis.get(REDIS_USER_INFO + ":" + userId);
         AppUser user = null;
-        if (StringUtils.isNoneBlank(userJson)) {
+        if (StringUtils.isNotBlank(userJson)) {
             user = JsonUtils.jsonToPojo(userJson, AppUser.class);
         } else {
             user = userService.getUser(userId);
@@ -101,7 +101,9 @@ public class UserController extends BaseController implements UserControllerApi 
         List<AppUserVO> list = new ArrayList<>();
         List<String> ids = JsonUtils.jsonToList(userIds, String.class);
         for (String id : ids) {
-            AppUserVO appUserVO = getBasicUserInfo(id);
+            AppUser user = getUser(id);
+            AppUserVO appUserVO = new AppUserVO();
+            BeanUtils.copyProperties(user, appUserVO);
             list.add(appUserVO);
         }
 

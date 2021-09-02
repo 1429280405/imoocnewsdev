@@ -1,12 +1,17 @@
 package com.imooc.api;
 
 
+import com.imooc.grace.result.GraceJSONResult;
+import com.imooc.pojo.vo.AppUserVO;
+import com.imooc.utils.JsonUtils;
 import com.imooc.utils.RedisOperator;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
@@ -16,15 +21,19 @@ import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class BaseController {
 
 
     @Value("${website.domain-name}")
     private static String DOMAIN_NAME;
+
     @Autowired
     public RedisOperator redis;
 
+    @Autowired
+    private RestTemplate restTemplate;
 
     public static final String MOBILE_SMSCODE = "mobile:smscode";
     public static final String REDIS_USER_TOKEN = "redis_user_token";
@@ -100,5 +109,18 @@ public class BaseController {
             countsStr = "0";
         }
         return Integer.valueOf(countsStr);
+    }
+
+
+    public List<AppUserVO> getBasicUserList(Set<String> idSet) {
+        String userServerUrl = "http://user.imoocnews.com:8003/user/queryByIds?userIds=" + JsonUtils.objectToJson(idSet);
+        ResponseEntity<GraceJSONResult> responseEntity = restTemplate.getForEntity(userServerUrl, GraceJSONResult.class);
+        GraceJSONResult jsonResult = responseEntity.getBody();
+        List<AppUserVO> publisherList = null;
+        if (jsonResult.getStatus() == 200) {
+            String userJson = JsonUtils.objectToJson(jsonResult.getData());
+            publisherList = JsonUtils.jsonToList(userJson, AppUserVO.class);
+        }
+        return publisherList;
     }
 }
