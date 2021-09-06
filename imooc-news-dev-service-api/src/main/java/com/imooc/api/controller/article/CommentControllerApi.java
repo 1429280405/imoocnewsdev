@@ -28,4 +28,25 @@ public interface CommentControllerApi {
     @GetMapping("/counts")
     public GraceJSONResult commentCounts(@RequestParam String articleId);
 
+
+    @ApiOperation(value = "查询文章的所有评论列表", notes = "查询文章的所有评论列表", httpMethod = "GET")
+    @GetMapping("/list")
+    public GraceJSONResult list(@RequestParam String articleId,
+                                @RequestParam(defaultValue = "1") Integer page,
+                                @RequestParam(defaultValue = "10") Integer pageSize);
+
+
+    @ApiOperation(value = "查询我的评论管理列表", notes = "查询我的评论管理列表", httpMethod = "POST")
+    @PostMapping("/mng")
+    public GraceJSONResult mng(@RequestParam String writerId,
+                               @RequestParam(defaultValue = "1") Integer page,
+                               @RequestParam(defaultValue = "10") Integer pageSize);
+
+
+    @ApiOperation(value = "作者删除评论", notes = "作者删除评论", httpMethod = "POST")
+    @PostMapping("/delete")
+    public GraceJSONResult delete(@RequestParam String writerId,
+                                  @RequestParam String commentId);
+
+
 }

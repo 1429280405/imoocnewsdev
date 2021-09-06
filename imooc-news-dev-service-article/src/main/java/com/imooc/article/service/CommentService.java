@@ -1,6 +1,7 @@
 package com.imooc.article.service;
 
 import com.imooc.pojo.bo.CommentReplyBO;
+import com.imooc.utils.PagedGridResult;
 
 /**
  * @author liujinqiang
@@ -8,4 +9,10 @@ import com.imooc.pojo.bo.CommentReplyBO;
  */
 public interface CommentService {
     void createComment(CommentReplyBO commentReplyBO, String nickname);
+
+    PagedGridResult queryArticleComments(String articleId, Integer page, Integer pageSize);
+
+    PagedGridResult queryWriterCommentsMng(String writerId, Integer page, Integer pageSize);
+
+    void deleteComment(String writerId, String commentId);
 }

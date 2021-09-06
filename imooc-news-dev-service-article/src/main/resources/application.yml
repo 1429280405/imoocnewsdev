@@ -12,7 +12,7 @@ spring:
   datasource:                                         # 数据源的相关配置
     type: com.zaxxer.hikari.HikariDataSource          # 数据源类型：HikariCP
     driver-class-name: com.mysql.jdbc.Driver          # mysql驱动
-    url: jdbc:mysql://192.168.25.170:3306/imooc-news-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false
+    url: jdbc:mysql://192.168.101.23:3306/imooc-news-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false
     username: root
     password: 123456
     hikari:
@@ -29,8 +29,13 @@ spring:
       time-zone: GMT+8
     data:
       mongodb:
-        uri: mongodb://root:root@192.168.1.202:27017
+        uri: mongodb://root:root@192.168.1.23:27017
         database: imooc-news
+  freemarker:
+    charset: UTF-8
+    content-type: text/html
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
 
 
 ############################################################
@@ -56,3 +61,10 @@ mapper:
 pagehelper:
   helperDialect: mysql
   supportMethodsArguments: true
+
+
+# 定义freemarker生成的html位置
+freemarker:
+  html:
+    target: D:/freemarker_html
+    article: E:/SoftWare/apache-tomcat-9.0.35/webapps/imooc-news/portal/a

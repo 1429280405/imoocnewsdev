@@ -5,6 +5,7 @@ import com.imooc.api.controller.article.CommentControllerApi;
 import com.imooc.article.service.CommentService;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.bo.CommentReplyBO;
+import com.imooc.utils.PagedGridResult;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
@@ -46,5 +47,23 @@ public class CommentController extends BaseController implements CommentControll
     public GraceJSONResult commentCounts(String articleId) {
         Integer counts = getCountsFromRedis(REDIS_ARTICLE_COMMENT_COUNTS + ":" + articleId);
         return GraceJSONResult.ok(counts);
+    }
+
+    @Override
+    public GraceJSONResult list(String articleId, Integer page, Integer pageSize) {
+        PagedGridResult gridResult = commentService.queryArticleComments(articleId, page, pageSize);
+        return GraceJSONResult.ok(gridResult);
+    }
+
+    @Override
+    public GraceJSONResult mng(String writerId, Integer page, Integer pageSize) {
+        PagedGridResult gridResult = commentService.queryWriterCommentsMng(writerId, page, pageSize);
+        return GraceJSONResult.ok(gridResult);
+    }
+
+    @Override
+    public GraceJSONResult delete(String writerId, String commentId) {
+        commentService.deleteComment(writerId, commentId);
+        return GraceJSONResult.ok();
     }
 }
