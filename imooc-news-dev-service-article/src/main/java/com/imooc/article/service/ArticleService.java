@@ -25,4 +25,11 @@ public interface ArticleService {
 
 
     void withdraw(String articleId, String userId);
+
+    /**
+     * 关联文章和gridfs的html文件id
+     * @param articleId
+     * @param articleMongoId
+     */
+    public void updateArticleToGridFs(String articleId,String articleMongoId);
 }

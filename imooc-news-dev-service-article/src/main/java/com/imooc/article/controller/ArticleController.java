@@ -5,6 +5,7 @@ import com.imooc.api.controller.article.ArticleControllerApi;
 import com.imooc.article.service.ArticleService;
 import com.imooc.enums.ArticleCoverType;
 import com.imooc.enums.ArticleReviewStatus;
+import com.imooc.exception.GraceException;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.grace.result.ResponseStatusEnum;
 import com.imooc.pojo.Category;
@@ -12,6 +13,7 @@ import com.imooc.pojo.bo.NewArticleBO;
 import com.imooc.pojo.vo.ArticleDetailVO;
 import com.imooc.utils.JsonUtils;
 import com.imooc.utils.PagedGridResult;
+import com.mongodb.client.gridfs.GridFSBucket;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
@@ -21,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.validation.BindingResult;
@@ -53,6 +56,9 @@ public class ArticleController extends BaseController implements ArticleControll
 
     @Value("${freemarker.html.article}")
     private String articlePath;
+
+    @Autowired
+    private GridFSBucket gridFSBucket;
 
     @Override
     public GraceJSONResult createArticle(@Valid NewArticleBO newArticleBO, BindingResult result) {
@@ -129,17 +135,32 @@ public class ArticleController extends BaseController implements ArticleControll
         if (status == ArticleReviewStatus.SUCCESS.type) {
             //审核通过，生成静态文章详情页
             try {
-                createArticleHTMLToGridFS(articleId);
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (TemplateException e) {
+                String articleMongoId = createArticleHTMLToGridFS(articleId);
+                //存储到对应的文章，进行关联保存
+                articleService.updateArticleToGridFs(articleId, articleMongoId);
+                //调用消费端，下载html
+                doDownloadArticleHTML(articleId, articleMongoId);
+            } catch (Exception e) {
                 e.printStackTrace();
             }
         }
         return GraceJSONResult.ok();
     }
 
-    private void createArticleHTMLToGridFS(String articleId) throws IOException, TemplateException {
+    private void doDownloadArticleHTML(String articleId, String articleMongoId) {
+        String url =
+                "http://html.imoocnews.com:8002/article/html/download?articleId="
+                        + articleId +
+                        "&articleMongoId="
+                        + articleMongoId;
+        ResponseEntity<Integer> responseEntity = restTemplate.getForEntity(url, Integer.class);
+        Integer status = responseEntity.getBody();
+        if (status != HttpStatus.OK.value()) {
+            GraceException.display(ResponseStatusEnum.ARTICLE_REVIEW_ERROR);
+        }
+    }
+
+    private String createArticleHTMLToGridFS(String articleId) throws Exception {
 
         Configuration cfg = new Configuration(Configuration.getVersion());
         String classpath = this.getClass().getResource("/").getPath();
@@ -152,14 +173,10 @@ public class ArticleController extends BaseController implements ArticleControll
         Map<String, Object> map = new HashMap<>();
         map.put("articleDetail", detailVO);
 
-        //融合动态数据和ftl生成html
-        File file = new File(articlePath);
-        if (!file.exists()) {
-            file.mkdirs();
-        }
-        FileWriter out = new FileWriter(articlePath + File.separator + detailVO.getId() + ".html");
-        template.process(map, out);
-        out.close();
+        String htmlContent = FreeMarkerTemplateUtils.processTemplateIntoString(template, map);
+        InputStream inputStream = IOUtils.toInputStream(htmlContent);
+        ObjectId fileId = gridFSBucket.uploadFromStream(detailVO.getId() + ".html", inputStream);
+        return fileId.toString();
 
     }
 

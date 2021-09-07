@@ -1,0 +1,30 @@
+server:
+#  port: 8002
+  tomcat:
+    uri-encoding: utf-8
+    max-swallow-size: -1
+
+spring:
+  profiles:
+    active: dev
+#  application:
+#    name: service-article
+    jackson:
+      date-format: yyyy-MM-dd HH:mm:ss
+      time-zone: GMT+8
+  data:
+    mongodb:
+      uri: mongodb://root:root@192.168.1.23:27017
+      database: imooc-news
+  freemarker:
+    charset: UTF-8
+    content-type: text/html
+    suffix: .ftl
+    template-loader-path: classpath:/templates/
+
+
+# 定义freemarker生成的html位置
+freemarker:
+  html:
+    target: D:/freemarker_html
+    article: E:/SoftWare/apache-tomcat-9.0.35/webapps/imooc-news/portal/a

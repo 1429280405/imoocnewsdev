@@ -101,6 +101,7 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         }
     }
 
+    @Transactional
     @Override
     public void updateAppointToPublish() {
         articleMapperCustom.updateAppointToPublish();
@@ -182,6 +183,15 @@ public class ArticleServiceImpl extends BaseService implements ArticleService {
         if (result != 1) {
             GraceException.display(ResponseStatusEnum.ARTICLE_WITHDRAW_ERROR);
         }
+    }
+
+    @Transactional
+    @Override
+    public void updateArticleToGridFs(String articleId, String articleMongoId) {
+        Article article = new Article();
+        article.setId(articleId);
+        article.setMongoFileId(articleMongoId);
+        articleMapper.updateByPrimaryKeySelective(article);
     }
 
     private Example generateExample(String articleId, String userId) {
