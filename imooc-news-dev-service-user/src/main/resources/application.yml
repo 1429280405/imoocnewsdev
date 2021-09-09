@@ -12,7 +12,7 @@ spring:
   datasource:                                         # 数据源的相关配置
     type: com.zaxxer.hikari.HikariDataSource          # 数据源类型：HikariCP
     driver-class-name: com.mysql.jdbc.Driver          # mysql驱动
-    url: jdbc:mysql://192.168.101.10:3306/imooc-news-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false
+    url: jdbc:mysql://192.168.76.170:3306/imooc-news-dev?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&useSSL=false
     username: root
     password: 123456
     hikari:
@@ -27,3 +27,26 @@ spring:
     jackson:
       date-format: yyyy-MM-dd HH:mm:ss
       time-zone: GMT+8
+
+
+############################################################
+#
+# eureka client 配置信息
+#
+############################################################
+eureka:
+  # 自定义eureka server的信息
+  server:
+    hostname: eureka
+    port: 7000
+  client:
+    # 所有的微服务都必须注册到eureka中
+    register-with-eureka: true
+    # 从注册中心获得检索服务实例
+    fetch-registry: true
+    # 注册中心的服务地址
+    service-url:
+      defaultZone: http://localhost:7001/eureka/,http://localhost:7002/eureka/
+  instance:
+    lease-renewal-interval-in-seconds: 3      # 调整微服务（eureka client）和注册中心（eureka server）的心跳时间
+    lease-expiration-duration-in-seconds: 5   # eureka 举例最近的一次心跳等待提出的时间，默认90s
