@@ -2,6 +2,7 @@ package com.imooc.article.controller;
 
 import com.imooc.api.BaseController;
 import com.imooc.api.controller.article.ArticlePortalControllerApi;
+import com.imooc.api.controller.user.UserControllerApi;
 import com.imooc.article.service.ArticlePortalService;
 import com.imooc.grace.result.GraceJSONResult;
 import com.imooc.pojo.Article;
@@ -38,6 +39,9 @@ public class ArticlePortalController extends BaseController implements ArticlePo
 
     @Autowired
     private RestTemplate restTemplate;
+
+    @Autowired
+    private UserControllerApi userControllerApi;
 
     @Override
     public GraceJSONResult createArticle(String keyword, Integer category, Integer page, Integer pageSize) {
@@ -128,12 +132,10 @@ public class ArticlePortalController extends BaseController implements ArticlePo
     }
 
     private List<AppUserVO> getPublisherList(Set<String> idSet) {
-        String userServerUrl = "http://user.imoocnews.com:8003/user/queryByIds?userIds=" + JsonUtils.objectToJson(idSet);
-        ResponseEntity<GraceJSONResult> responseEntity = restTemplate.getForEntity(userServerUrl, GraceJSONResult.class);
-        GraceJSONResult jsonResult = responseEntity.getBody();
+        GraceJSONResult graceJSONResult = userControllerApi.queryByIds(JsonUtils.objectToJson(idSet));
         List<AppUserVO> publisherList = null;
-        if (jsonResult.getStatus() == 200) {
-            String userJson = JsonUtils.objectToJson(jsonResult.getData());
+        if (graceJSONResult.getStatus() == 200) {
+            String userJson = JsonUtils.objectToJson(graceJSONResult.getData());
             publisherList = JsonUtils.jsonToList(userJson, AppUserVO.class);
         }
         return publisherList;

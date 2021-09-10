@@ -11,6 +11,8 @@ import com.imooc.pojo.vo.UserAccountInfoVO;
 import com.imooc.user.service.UserService;
 import com.imooc.utils.JsonUtils;
 import com.imooc.utils.RedisOperator;
+import com.netflix.hystrix.contrib.javanica.annotation.DefaultProperties;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -29,6 +31,7 @@ import java.util.Map;
  */
 @RestController
 @Slf4j
+@DefaultProperties(defaultFallback = "defaultFallback")
 public class UserController extends BaseController implements UserControllerApi {
 
     @Autowired
@@ -36,6 +39,12 @@ public class UserController extends BaseController implements UserControllerApi 
 
     @Autowired
     private RedisOperator redis;
+
+
+    public GraceJSONResult defaultFallback() {
+        log.info("全局降级方法");
+        return GraceJSONResult.errorCustom(ResponseStatusEnum.SYSTEM_ERROR);
+    }
 
     @Override
     public GraceJSONResult getUserInfo(String userId) {
@@ -83,16 +92,14 @@ public class UserController extends BaseController implements UserControllerApi 
     }
 
     @Override
-    public GraceJSONResult updateUserInfo(@Valid UpdateUserInfoBO userInfoBO, BindingResult bindingResult) {
-        if (bindingResult.hasErrors()) {
-            Map<String, String> map = getErrors(bindingResult);
-            return GraceJSONResult.errorMap(map);
-        }
+    public GraceJSONResult updateUserInfo(@Valid UpdateUserInfoBO userInfoBO) {
         //执行更新操作
         userService.updateUserInfo(userInfoBO);
         return GraceJSONResult.ok();
     }
 
+
+    @HystrixCommand//(fallbackMethod = "queryByIdsFallBack")
     @Override
     public GraceJSONResult queryByIds(String userIds) {
         if (StringUtils.isBlank(userIds)) {
@@ -104,6 +111,18 @@ public class UserController extends BaseController implements UserControllerApi 
             AppUser user = getUser(id);
             AppUserVO appUserVO = new AppUserVO();
             BeanUtils.copyProperties(user, appUserVO);
+            list.add(appUserVO);
+        }
+
+        return GraceJSONResult.ok(list);
+    }
+
+    public GraceJSONResult queryByIdsFallBack(String userIds) {
+        log.info("进入降级方法");
+        List<AppUserVO> list = new ArrayList<>();
+        List<String> ids = JsonUtils.jsonToList(userIds, String.class);
+        for (String id : ids) {
+            AppUserVO appUserVO = new AppUserVO();
             list.add(appUserVO);
         }
 
